@@ -1,3 +1,21 @@
+/**
+ * Portfolio Service
+ * 
+ * Purpose: Manages portfolio and asset data operations with mock backend support
+ * Connected to: 
+ *   - DashboardComponent for portfolio management
+ *   - PortfolioItemComponent for asset operations
+ *   - HTTP backend APIs (when useMockBackend is false)
+ * Used by: Components needing portfolio CRUD operations
+ * 
+ * Features:
+ * - Portfolio CRUD operations (create, read, update, delete)
+ * - Asset management within portfolios
+ * - Automatic value and allocation calculations
+ * - Mock backend for development/testing
+ * - Observable-based async operations
+ */
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, delay } from 'rxjs';
@@ -5,6 +23,7 @@ import { environment } from '../../environments/environment';
 
 export interface Portfolio {
   id?: number;
+  name?: string;
   totalValue: number;
   assets: Asset[];
   performance: PerformanceMetric[];
@@ -34,26 +53,10 @@ export class PortfolioService {
   private apiUrl = `${environment.apiUrl}/portfolios`;
   private assetsUrl = `${environment.apiUrl}/assets`;
 
-  // Mock data storage
-  private mockPortfolios: Portfolio[] = [
-    {
-      id: 1,
-      totalValue: 15000,
-      assets: [
-        { id: 1, name: 'Apple Inc.', symbol: 'AAPL', quantity: 50, currentPrice: 150, value: 7500, allocation: 50 },
-        { id: 2, name: 'Microsoft', symbol: 'MSFT', quantity: 25, currentPrice: 300, value: 7500, allocation: 50 }
-      ],
-      performance: []
-    },
-    {
-      id: 2,
-      totalValue: 8000,
-      assets: [
-        { id: 3, name: 'Google', symbol: 'GOOGL', quantity: 10, currentPrice: 800, value: 8000, allocation: 100 }
-      ],
-      performance: []
-    }
-  ];
+  // Start with empty mock data for testing
+  private mockPortfolios: Portfolio[] = [];
+  private nextPortfolioId = 1;
+  private nextAssetId = 1;
 
   constructor(private http: HttpClient) {}
 
@@ -125,7 +128,7 @@ export class PortfolioService {
   // Mock implementations
   private mockGetAllPortfolios(): Observable<Portfolio[]> {
     console.log('Mock: Getting all portfolios', this.mockPortfolios);
-    return of([...this.mockPortfolios]).pipe(delay(500));
+    return of([...this.mockPortfolios]).pipe(delay(300));
   }
 
   private mockGetPortfolioById(id: number): Observable<Portfolio> {
@@ -136,14 +139,14 @@ export class PortfolioService {
 
   private mockCreatePortfolio(portfolio: Partial<Portfolio>): Observable<Portfolio> {
     const newPortfolio: Portfolio = {
-      id: Math.max(...this.mockPortfolios.map(p => p.id || 0)) + 1,
+      id: this.nextPortfolioId++,
+      name: portfolio.name || `Portfolio ${this.nextPortfolioId - 1}`,
       totalValue: portfolio.totalValue || 0,
       assets: portfolio.assets || [],
       performance: portfolio.performance || []
     };
     this.mockPortfolios.push(newPortfolio);
     console.log('Mock: Created portfolio', newPortfolio);
-    console.log('Mock: All portfolios now', this.mockPortfolios);
     return of({ ...newPortfolio }).pipe(delay(300));
   }
 
@@ -151,6 +154,10 @@ export class PortfolioService {
     const index = this.mockPortfolios.findIndex(p => p.id === id);
     if (index > -1) {
       this.mockPortfolios[index] = { ...this.mockPortfolios[index], ...portfolio };
+      // Recalculate total value if assets were updated
+      if (portfolio.assets) {
+        this.mockPortfolios[index].totalValue = portfolio.assets.reduce((sum, asset) => sum + asset.value, 0);
+      }
       console.log('Mock: Updated portfolio', this.mockPortfolios[index]);
       return of({ ...this.mockPortfolios[index] }).pipe(delay(300));
     }
@@ -162,7 +169,6 @@ export class PortfolioService {
     if (index > -1) {
       this.mockPortfolios.splice(index, 1);
       console.log('Mock: Deleted portfolio', id);
-      console.log('Mock: Remaining portfolios', this.mockPortfolios);
     }
     return of(void 0).pipe(delay(300));
   }
@@ -178,18 +184,19 @@ export class PortfolioService {
     const portfolio = this.mockPortfolios.find(p => p.id === portfolioId);
     if (portfolio) {
       const newAsset: Asset = {
-        id: Math.floor(Math.random() * 10000) + 1,
+        id: this.nextAssetId++,
         name: asset.name!,
         symbol: asset.symbol!,
         quantity: asset.quantity!,
         currentPrice: asset.currentPrice!,
         value: asset.quantity! * asset.currentPrice!,
-        allocation: asset.allocation!
+        allocation: asset.allocation || 0
       };
       portfolio.assets.push(newAsset);
-      portfolio.totalValue += newAsset.value;
+      // Recalculate portfolio total value and allocations
+      portfolio.totalValue = portfolio.assets.reduce((sum, a) => sum + a.value, 0);
+      this.recalculateAllocations(portfolio);
       console.log('Mock: Added asset to portfolio', portfolioId, newAsset);
-      console.log('Mock: Updated portfolio', portfolio);
       return of({ ...newAsset }).pipe(delay(300));
     }
     return of({} as Asset).pipe(delay(300));
@@ -199,14 +206,14 @@ export class PortfolioService {
     for (let portfolio of this.mockPortfolios) {
       const assetIndex = portfolio.assets.findIndex(a => a.id === id);
       if (assetIndex > -1) {
-        const oldValue = portfolio.assets[assetIndex].value;
         portfolio.assets[assetIndex] = { ...portfolio.assets[assetIndex], ...asset };
         // Recalculate value if quantity or price changed
         if (asset.quantity !== undefined || asset.currentPrice !== undefined) {
           portfolio.assets[assetIndex].value = portfolio.assets[assetIndex].quantity * portfolio.assets[assetIndex].currentPrice;
         }
-        // Update portfolio total value
-        portfolio.totalValue = portfolio.totalValue - oldValue + portfolio.assets[assetIndex].value;
+        // Recalculate portfolio total value and allocations
+        portfolio.totalValue = portfolio.assets.reduce((sum, a) => sum + a.value, 0);
+        this.recalculateAllocations(portfolio);
         console.log('Mock: Updated asset', portfolio.assets[assetIndex]);
         return of({ ...portfolio.assets[assetIndex] }).pipe(delay(300));
       }
@@ -218,12 +225,26 @@ export class PortfolioService {
     for (let portfolio of this.mockPortfolios) {
       const assetIndex = portfolio.assets.findIndex(a => a.id === id);
       if (assetIndex > -1) {
-        const removedAsset = portfolio.assets.splice(assetIndex, 1)[0];
-        portfolio.totalValue -= removedAsset.value;
+        portfolio.assets.splice(assetIndex, 1);
+        // Recalculate portfolio total value and allocations
+        portfolio.totalValue = portfolio.assets.reduce((sum, a) => sum + a.value, 0);
+        this.recalculateAllocations(portfolio);
         console.log('Mock: Deleted asset', id, 'from portfolio', portfolio.id);
         break;
       }
     }
     return of(void 0).pipe(delay(300));
+  }
+
+  private recalculateAllocations(portfolio: Portfolio): void {
+    if (portfolio.totalValue > 0) {
+      portfolio.assets.forEach(asset => {
+        asset.allocation = (asset.value / portfolio.totalValue) * 100;
+      });
+    } else {
+      portfolio.assets.forEach(asset => {
+        asset.allocation = 0;
+      });
+    }
   }
 }

@@ -1,0 +1,258 @@
+/**
+ * Dashboard Component Styles
+ * 
+ * Purpose: Styling for the main dashboard view and its child components
+ * Connected to: DashboardComponent (dashboard.component.ts)
+ * Used by: Angular component styling system
+ * 
+ * Contains styles for:
+ * - Main dashboard layout and grid system
+ * - Portfolio cards and expansion panels
+ * - Asset display and forms
+ * - Statistics cards
+ * - Responsive design breakpoints
+ */
+
+/* Main Container */
+.dashboard-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header Section */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Statistics Row */
+.stats-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  flex: 1;
+  min-height: 100px;
+}
+
+.stat-content {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1976d2;
+}
+
+.stat-label {
+  color: #666;
+  margin-top: 5px;
+}
+
+/* Main Content Layout */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.content-row {
+  display: flex;
+  gap: 20px;
+}
+
+.portfolios-section {
+  flex: 2;
+}
+
+.side-section {
+  flex: 1;
+}
+
+.test-section {
+  width: 100%;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+  width: 100%;
+  height: auto;
+  min-height: 400px;
+}
+
+.portfolios-section .dashboard-card {
+  min-height: 500px;
+}
+
+.side-section .dashboard-card {
+  min-height: 400px;
+}
+
+.test-section .dashboard-card {
+  min-height: 200px;
+}
+
+/* Portfolio Management */
+.create-portfolio-form {
+  margin-bottom: 20px;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.portfolio-panel {
+  margin-bottom: 12px;
+}
+
+.portfolio-details {
+  padding: 16px 0;
+}
+
+/* Asset Management */
+.assets-section h4 {
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.asset-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.asset-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.asset-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.asset-details {
+  display: flex;
+  gap: 16px;
+}
+
+.asset-details span {
+  font-size: 12px;
+  color: #666;
+}
+
+.no-assets {
+  text-align: center;
+  color: #666;
+  margin: 20px 0;
+}
+
+/* Forms */
+.add-asset-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.add-asset-form {
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  margin-top: 12px;
+}
+
+.asset-form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.asset-form-row mat-form-field {
+  flex: 1;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/* Actions */
+.portfolio-actions {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.test-actions {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+/* Placeholder Content */
+.placeholder-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #666;
+  gap: 20px;
+}
+
+/* Loading States */
+.loading-indicator {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+/* Material Components Override */
+mat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .content-row {
+    flex-direction: column;
+  }
+
+  .stats-row {
+    flex-direction: column;
+  }
+
+  .dashboard-container {
+    padding: 10px;
+  }
+
+  .asset-form-row {
+    flex-direction: column;
+  }
+
+  .test-actions {
+    flex-direction: column;
+  }
+} 

@@ -1,3 +1,22 @@
+/**
+ * Authentication Service
+ * 
+ * Purpose: Manages user authentication, login/logout, and session management
+ * Connected to: 
+ *   - DashboardComponent for user display and logout
+ *   - LoginComponent for authentication
+ *   - AuthGuard for route protection
+ *   - HTTP backend APIs for authentication
+ * Used by: Components and guards that need user authentication
+ * 
+ * Features:
+ * - User login and registration
+ * - JWT token management
+ * - User session persistence
+ * - Mock authentication for development
+ * - Observable user state management
+ */
+
 // src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';

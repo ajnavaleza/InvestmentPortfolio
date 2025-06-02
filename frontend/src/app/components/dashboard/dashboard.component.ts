@@ -1,291 +1,112 @@
+/**
+ * Dashboard Component
+ * 
+ * Purpose: Main dashboard controller for portfolio management application
+ * Connected to: 
+ *   - PortfolioService for data operations
+ *   - AuthService for user authentication
+ *   - MarketDataService for stock information
+ *   - Child components: PortfolioFormComponent, PortfolioItemComponent
+ * Used by: App routing system as the primary authenticated view
+ * 
+ * Features:
+ * - Portfolio overview with statistics
+ * - Portfolio creation and management
+ * - Asset management with real-time calculations
+ * - User authentication status
+ * - API testing utilities
+ */
+
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatGridListModule } from '@angular/material/grid-list';
+import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { PortfolioService, Portfolio, Asset } from '../../services/portfolio.service';
 import { AuthService, User } from '../../services/auth.service';
-import { MockBackendService } from 'src/app/services/mock-backend.service';
+import { MarketDataService, StockInfo, SearchResult } from '../../services/market-data.service';
+import { PortfolioFormComponent } from '../portfolio-form/portfolio-form.component';
+import { PortfolioItemComponent } from '../portfolio-item/portfolio-item.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-    MatGridListModule, 
+    FormsModule,
     MatCardModule, 
     MatButtonModule,
     MatIconModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatDialogModule,
+    MatExpansionModule,
+    MatAutocompleteModule,
+    PortfolioFormComponent,
+    PortfolioItemComponent
   ],
-  template: `
-    <div class="dashboard-container">
-      <div class="dashboard-header">
-        <h1>Portfolio Dashboard</h1>
-        <div class="user-info" *ngIf="currentUser">
-          <span>Welcome, {{currentUser.username}}!</span>
-          <button mat-button (click)="logout()" color="warn">
-            <mat-icon>logout</mat-icon>
-            Logout
-          </button>
-        </div>
-      </div>
-      
-      <div class="stats-row">
-        <mat-card class="stat-card">
-          <mat-card-content>
-            <div class="stat-content">
-              <div class="stat-value">{{portfolios.length}}</div>
-              <div class="stat-label">Total Portfolios</div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="stat-card">
-          <mat-card-content>
-            <div class="stat-content">
-              <div class="stat-value">{{getTotalValue() | currency}}</div>
-              <div class="stat-label">Total Value</div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="stat-card">
-          <mat-card-content>
-            <div class="stat-content">
-              <div class="stat-value">{{getTotalAssets()}}</div>
-              <div class="stat-label">Total Assets</div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-      </div>
-
-      <mat-grid-list cols="2" rowHeight="400px" gutterSize="16">
-        <mat-grid-tile>
-          <mat-card class="dashboard-card">
-            <mat-card-header>
-              <mat-card-title>Portfolios</mat-card-title>
-              <button mat-button color="primary" (click)="mockCreatePortfolio()">
-                <mat-icon>add</mat-icon>
-                Create Test Portfolio
-              </button>
-            </mat-card-header>
-            <mat-card-content>
-              <div class="portfolio-list" *ngIf="portfolios.length > 0; else noPortfolios">
-                <div class="portfolio-item" *ngFor="let portfolio of portfolios">
-                  <div class="portfolio-info">
-                    <strong>Portfolio #{{portfolio.id}}</strong>
-                    <span>Value: {{portfolio.totalValue | currency}}</span>
-                    <span>Assets: {{portfolio.assets?.length || 0}}</span>
-                  </div>
-                  <button mat-icon-button color="warn" (click)="deletePortfolio(portfolio.id!)">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </div>
-              </div>
-              <ng-template #noPortfolios>
-                <div class="placeholder-content">
-                  <p>No portfolios found</p>
-                  <button mat-raised-button color="primary" (click)="createTestPortfolio()">
-                    Create Your First Portfolio
-                  </button>
-                </div>
-              </ng-template>
-            </mat-card-content>
-          </mat-card>
-        </mat-grid-tile>
-
-        <mat-grid-tile>
-          <mat-card class="dashboard-card">
-            <mat-card-header>
-              <mat-card-title>Recent Assets</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <div class="asset-list" *ngIf="recentAssets.length > 0; else noAssets">
-                <div class="asset-item" *ngFor="let asset of recentAssets">
-                  <div class="asset-info">
-                    <strong>{{asset.symbol}}</strong>
-                    <span>{{asset.name}}</span>
-                    <span>Qty: {{asset.quantity}} | Price: {{asset.currentPrice | currency}}</span>
-                  </div>
-                </div>
-              </div>
-              <ng-template #noAssets>
-                <div class="placeholder-content">
-                  <p>No assets found</p>
-                </div>
-              </ng-template>
-            </mat-card-content>
-          </mat-card>
-        </mat-grid-tile>
-
-        <mat-grid-tile colspan="2">
-          <mat-card class="dashboard-card">
-            <mat-card-header>
-              <mat-card-title>API Test Actions</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <div class="test-actions">
-                <button mat-raised-button color="primary" (click)="testGetPortfolios()">
-                  Test Get Portfolios
-                </button>
-                <button mat-raised-button color="accent" (click)="testGetCurrentUser()">
-                  Test Get Current User
-                </button>
-                <button mat-raised-button (click)="refreshData()">
-                  <mat-icon>refresh</mat-icon>
-                  Refresh Data
-                </button>
-              </div>
-              <div class="loading-indicator" *ngIf="isLoading">
-                Loading...
-              </div>
-            </mat-card-content>
-          </mat-card>
-        </mat-grid-tile>
-      </mat-grid-list>
-    </div>
-  `,
-  styles: [`
-    .dashboard-container {
-      padding: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .dashboard-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .stats-row {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-
-    .stat-card {
-      flex: 1;
-      min-height: 100px;
-    }
-
-    .stat-content {
-      text-align: center;
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: bold;
-      color: #1976d2;
-    }
-
-    .stat-label {
-      color: #666;
-      margin-top: 5px;
-    }
-
-    .dashboard-card {
-      width: 100%;
-      height: 100%;
-    }
-
-    .portfolio-list, .asset-list {
-      max-height: 280px;
-      overflow-y: auto;
-    }
-
-    .portfolio-item, .asset-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-    }
-
-    .portfolio-info, .asset-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .portfolio-info span, .asset-info span {
-      font-size: 12px;
-      color: #666;
-    }
-
-    .placeholder-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 200px;
-      color: #666;
-      gap: 20px;
-    }
-
-    .test-actions {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-
-    .loading-indicator {
-      text-align: center;
-      color: #666;
-      font-style: italic;
-    }
-
-    mat-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-  `]
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
+  // Portfolio data
   portfolios: Portfolio[] = [];
   recentAssets: Asset[] = [];
   currentUser: User | null = null;
   isLoading = false;
+  
+  // UI state management
+  showCreatePortfolio = false;
+  newPortfolioName = '';
+  showAddAsset: { [portfolioId: number]: boolean } = {};
+  newAsset = {
+    symbol: '',
+    name: '',
+    quantity: 0,
+    currentPrice: 0
+  };
+  
+  // Market data for autocomplete
+  filteredStocks: SearchResult[] = [];
+  isLoadingMarketData = false;
 
   constructor(
     private portfolioService: PortfolioService,
     private authService: AuthService,
     private snackBar: MatSnackBar,
-    private mockBackend: MockBackendService
+    private marketDataService: MarketDataService
   ) {}
-
-  mockCreatePortfolio(): void {
-    this.mockBackend.mockCreatePortfolio({
-      totalValue: 10000,
-      assets: []
-    }).subscribe(portfolio => {
-      console.log('Created mock portfolio:', portfolio);
-    });
-  }
 
   ngOnInit(): void {
     this.loadCurrentUser();
     this.loadPortfolios();
+    
+    // Subscribe to market data loading state
+    this.marketDataService.isLoading.subscribe(loading => {
+      this.isLoadingMarketData = loading;
+    });
   }
 
+  /**
+   * Load current authenticated user information
+   */
   loadCurrentUser(): void {
-    this.authService.currentUser$.subscribe(user => {
+    this.authService.currentUser$.subscribe(user=> {
       this.currentUser = user;
     });
   }
 
+  /**
+   * Load all portfolios and update recent assets
+   */
   loadPortfolios(): void {
     this.isLoading = true;
     this.portfolioService.getAllPortfolios().subscribe({
@@ -293,7 +114,6 @@ export class DashboardComponent implements OnInit {
         this.portfolios = portfolios;
         this.loadRecentAssets();
         this.isLoading = false;
-        console.log('Loaded portfolios:', portfolios);
       },
       error: (error) => {
         this.isLoading = false;
@@ -303,34 +123,38 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  /**
+   * Extract recent assets from all portfolios for sidebar display
+   */
   loadRecentAssets(): void {
-    // Load assets from the first portfolio if available
-    if (this.portfolios.length > 0) {
-      const firstPortfolio = this.portfolios[0];
-      if (firstPortfolio.id) {
-        this.portfolioService.getAssetsByPortfolio(firstPortfolio.id).subscribe({
-          next: (assets) => {
-            this.recentAssets = assets.slice(0, 5); // Show only first 5
-            console.log('Loaded recent assets:', assets);
-          },
-          error: (error) => {
-            console.error('Error loading assets:', error);
-          }
-        });
+    this.recentAssets = [];
+    this.portfolios.forEach(portfolio => {
+      if (portfolio.assets) {
+        this.recentAssets.push(...portfolio.assets);
       }
-    }
+    });
+    this.recentAssets = this.recentAssets.slice(0, 5);
   }
 
-  createTestPortfolio(): void {
-    const testPortfolio = {
+  /**
+   * Create a new portfolio with validation
+   */
+  createPortfolio(): void {
+    if (!this.newPortfolioName.trim()) {
+      this.snackBar.open('Please enter a portfolio name', 'Close', { duration: 3000 });
+      return;
+    }
+
+    const portfolio = {
+      name: this.newPortfolioName.trim(),
       totalValue: 0
     };
 
-    this.portfolioService.createPortfolio(testPortfolio).subscribe({
+    this.portfolioService.createPortfolio(portfolio).subscribe({
       next: (portfolio) => {
-        this.snackBar.open('Test portfolio created successfully!', 'Close', { duration: 3000 });
-        this.addTestAssetToPortfolio(portfolio.id!);
+        this.snackBar.open('Portfolio created successfully!', 'Close', { duration: 3000 });
         this.loadPortfolios();
+        this.cancelCreatePortfolio();
       },
       error: (error) => {
         console.error('Error creating portfolio:', error);
@@ -339,41 +163,154 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  addTestAssetToPortfolio(portfolioId: number): void {
-    const testAsset = {
-      name: 'Apple Inc.',
-      symbol: 'AAPL',
-      quantity: 10,
-      currentPrice: 150.00,
-      allocation: 100
-    };
+  /**
+   * Cancel portfolio creation and reset form
+   */
+  cancelCreatePortfolio(): void {
+    this.showCreatePortfolio = false;
+    this.newPortfolioName = '';
+  }
 
-    this.portfolioService.addAssetToPortfolio(portfolioId, testAsset).subscribe({
+  /**
+   * Initialize asset addition for a specific portfolio
+   */
+  toggleAddAsset(portfolioId: number): void {
+    this.showAddAsset[portfolioId] = true;
+    this.resetNewAsset();
+    // Start with some popular stocks for initial display
+    this.loadInitialStocks();
+  }
+
+  /**
+   * Add a new asset to the specified portfolio
+   */
+  addAsset(portfolioId: number): void {
+    if (!this.newAsset.symbol || !this.newAsset.name || this.newAsset.quantity <= 0 || this.newAsset.currentPrice <= 0) {
+      this.snackBar.open('Please fill in all asset fields with valid values', 'Close', { duration: 3000 });
+      return;
+    }
+
+    this.portfolioService.addAssetToPortfolio(portfolioId, this.newAsset).subscribe({
       next: (asset) => {
-        console.log('Test asset added:', asset);
+        this.snackBar.open('Asset added successfully!', 'Close', { duration: 3000 });
         this.loadPortfolios();
+        this.cancelAddAsset(portfolioId);
       },
       error: (error) => {
-        console.error('Error adding test asset:', error);
+        console.error('Error adding asset:', error);
+        this.snackBar.open('Error adding asset', 'Close', { duration: 3000 });
       }
     });
   }
 
-  deletePortfolio(id: number): void {
-    if (confirm('Are you sure you want to delete this portfolio?')) {
-      this.portfolioService.deletePortfolio(id).subscribe({
-        next: () => {
-          this.snackBar.open('Portfolio deleted successfully!', 'Close', { duration: 3000 });
-          this.loadPortfolios();
-        },
-        error: (error) => {
-          console.error('Error deleting portfolio:', error);
-          this.snackBar.open('Error deleting portfolio', 'Close', { duration: 3000 });
-        }
-      });
+  /**
+   * Cancel asset addition for a specific portfolio
+   */
+  cancelAddAsset(portfolioId: number): void {
+    this.showAddAsset[portfolioId] = false;
+    this.resetNewAsset();
+  }
+
+  /**
+   * Reset the new asset form to default values
+   */
+  resetNewAsset(): void {
+    this.newAsset = {
+      symbol: '',
+      name: '',
+      quantity: 0,
+      currentPrice: 0
+    };
+    this.filteredStocks = [];
+  }
+
+  /**
+   * Handle stock symbol input changes for autocomplete with live data
+   */
+  onSymbolChange(): void {
+    if (this.newAsset.symbol.length > 0) {
+      this.searchLiveStocks(this.newAsset.symbol);
+    } else {
+      this.loadInitialStocks();
     }
   }
 
+  /**
+   * Handle stock selection from autocomplete with live price lookup
+   */
+  onStockSelected(symbol: string): void {
+    this.isLoadingMarketData = true;
+    
+    this.marketDataService.getStockInfo(symbol).subscribe({
+      next: (stockInfo) => {
+        this.newAsset.symbol = stockInfo.symbol;
+        this.newAsset.name = stockInfo.name;
+        this.newAsset.currentPrice = stockInfo.currentPrice;
+        this.isLoadingMarketData = false;
+        
+        if (stockInfo.change !== undefined) {
+          const changeText = stockInfo.change >= 0 ? '+' : '';
+          this.snackBar.open(
+            `${stockInfo.symbol}: $${stockInfo.currentPrice} (${changeText}${stockInfo.change?.toFixed(2)})`,
+            'Close',
+            { duration: 3000 }
+          );
+        }
+      },
+      error: (error) => {
+        this.isLoadingMarketData = false;
+        console.error('Error fetching stock info:', error);
+        this.snackBar.open('Failed to load live stock data, using cached info', 'Close', { duration: 3000 });
+        
+        // Try to find in filtered stocks for basic info
+        const selected = this.filteredStocks.find(stock => stock.symbol === symbol);
+        if (selected) {
+          this.newAsset.symbol = selected.symbol;
+          this.newAsset.name = selected.name;
+          // Keep existing price or set to 0 for manual entry
+          if (this.newAsset.currentPrice === 0) {
+            this.newAsset.currentPrice = 0;
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Delete an asset by ID
+   */
+  deleteAsset(assetId: number): void {
+    this.portfolioService.deleteAsset(assetId).subscribe({
+      next: () => {
+        this.snackBar.open('Asset deleted successfully!', 'Close', { duration: 3000 });
+        this.loadPortfolios();
+      },
+      error: (error) => {
+        console.error('Error deleting asset:', error);
+        this.snackBar.open('Error deleting asset', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  /**
+   * Delete a portfolio by ID
+   */
+  deletePortfolio(id: number): void {
+    this.portfolioService.deletePortfolio(id).subscribe({
+      next: () => {
+        this.snackBar.open('Portfolio deleted successfully!', 'Close', { duration: 3000 });
+        this.loadPortfolios();
+      },
+      error: (error) => {
+        console.error('Error deleting portfolio:', error);
+        this.snackBar.open('Error deleting portfolio', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  /**
+   * Test API endpoint for portfolio retrieval
+   */
   testGetPortfolios(): void {
     this.portfolioService.getAllPortfolios().subscribe({
       next: (portfolios) => {
@@ -387,6 +324,9 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  /**
+   * Test API endpoint for user authentication
+   */
   testGetCurrentUser(): void {
     this.authService.getCurrentUser().subscribe({
       next: (user) => {
@@ -400,20 +340,84 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  /**
+   * Refresh all dashboard data
+   */
   refreshData(): void {
     this.loadPortfolios();
   }
 
+  /**
+   * Log out current user and reload page
+   */
   logout(): void {
     this.authService.logout();
     window.location.reload();
   }
 
+  /**
+   * Calculate total value across all portfolios
+   */
   getTotalValue(): number {
     return this.portfolios.reduce((total, portfolio) => total + (portfolio.totalValue || 0), 0);
   }
 
+  /**
+   * Calculate total number of assets across all portfolios
+   */
   getTotalAssets(): number {
-    return this.portfolios.reduce((total, portfolio) => total + (portfolio.assets?.length || 0), 0);
+    return this.portfolios.reduce((total, portfolio) => total + (portfolio.assets.length || 0), 0);
+  }
+
+  /**
+   * Search for live stocks using the market data service
+   */
+  private searchLiveStocks(query: string): void {
+    this.marketDataService.searchStocks(query).subscribe({
+      next: (results) => {
+        this.filteredStocks = results.slice(0, 10); // Limit to 10 results
+      },
+      error: (error) => {
+        console.error('Error searching stocks:', error);
+        // Keep existing filtered stocks or clear them
+        this.filteredStocks = [];
+      }
+    });
+  }
+
+  /**
+   * Load initial popular stocks for display
+   */
+  private loadInitialStocks(): void {
+    // Use sample stocks for initial display to avoid unnecessary API calls
+    const sampleStocks = this.marketDataService.getAllSampleStocks();
+    this.filteredStocks = sampleStocks.slice(0, 5).map(stock => ({
+      symbol: stock.symbol,
+      name: stock.name,
+      type: 'Equity',
+      region: 'United States',
+      currency: 'USD'
+    }));
+  }
+
+  /**
+   * Test real-time market data connection
+   */
+  testMarketDataConnection(): void {
+    this.snackBar.open('Testing market data connection...', 'Close', { duration: 2000 });
+    
+    this.marketDataService.getStockInfo('AAPL').subscribe({
+      next: (stockInfo) => {
+        this.snackBar.open(
+          `Market Data Test: AAPL = $${stockInfo.currentPrice} (Updated: ${stockInfo.lastUpdated})`,
+          'Close',
+          { duration: 5000 }
+        );
+      },
+      error: (error) => {
+        console.error('Market data test failed:', error);
+        this.snackBar.open('Market Data Test Failed: Using fallback data', 'Close', { duration: 3000 });
+      }
+    });
   }
 }

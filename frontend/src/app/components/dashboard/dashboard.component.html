@@ -1,0 +1,169 @@
+<!--
+  Dashboard Component Template
+  
+  Purpose: Main dashboard view displaying portfolio overview and management
+  Connected to: DashboardComponent (dashboard.component.ts)
+  Used by: App routing system as the main authenticated view
+  
+  Features:
+  - Portfolio statistics display (total count, value, assets)
+  - Portfolio creation and management
+  - Asset management within portfolios
+  - Recent assets overview
+  - API testing utilities
+-->
+
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Portfolio Dashboard</h1>
+    <div class="user-info" *ngIf="currentUser">
+      <span>Welcome, {{currentUser.username}}!</span>
+      <button mat-button (click)="logout()" color="warn">
+        <mat-icon>logout</mat-icon>
+        Logout
+      </button>
+    </div>
+  </div>
+  
+  <!-- Statistics Row -->
+  <div class="stats-row">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-value">{{portfolios.length}}</div>
+          <div class="stat-label">Total Portfolios</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-value">{{getTotalValue() | currency}}</div>
+          <div class="stat-label">Total Value</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-value">{{getTotalAssets()}}</div>
+          <div class="stat-label">Total Assets</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <div class="content-row">
+      <!-- Portfolios Section -->
+      <div class="portfolios-section">
+        <mat-card class="dashboard-card">
+          <mat-card-header>
+            <mat-card-title>Portfolios</mat-card-title>
+            <button mat-button color="primary" (click)="showCreatePortfolio = true" *ngIf="!showCreatePortfolio">
+              <mat-icon>add</mat-icon>
+              Create Portfolio
+            </button>
+          </mat-card-header>
+          <mat-card-content>
+            <!-- Create Portfolio Form -->
+            <app-portfolio-form 
+              *ngIf="showCreatePortfolio"
+              [portfolioName]="newPortfolioName"
+              (portfolioNameChange)="newPortfolioName = $event"
+              (createPortfolio)="createPortfolio()"
+              (cancelCreate)="cancelCreatePortfolio()">
+            </app-portfolio-form>
+
+            <!-- Portfolio List -->
+            <div class="portfolio-list" *ngIf="portfolios.length > 0; else noPortfolios">
+              <app-portfolio-item 
+                *ngFor="let portfolio of portfolios" 
+                [portfolio]="portfolio"
+                [showAddAsset]="showAddAsset[portfolio.id!]"
+                [newAsset]="newAsset"
+                [filteredStocks]="filteredStocks"
+                (toggleAddAsset)="toggleAddAsset(portfolio.id!)"
+                (addAsset)="addAsset(portfolio.id!)"
+                (cancelAddAsset)="cancelAddAsset(portfolio.id!)"
+                (deleteAsset)="deleteAsset($event)"
+                (deletePortfolio)="deletePortfolio(portfolio.id!)"
+                (symbolChange)="onSymbolChange()"
+                (stockSelected)="onStockSelected($event)">
+              </app-portfolio-item>
+            </div>
+            
+            <ng-template #noPortfolios>
+              <div class="placeholder-content" *ngIf="!showCreatePortfolio">
+                <p>No portfolios found</p>
+                <button mat-raised-button color="primary" (click)="showCreatePortfolio = true">
+                  Create Your First Portfolio
+                </button>
+              </div>
+            </ng-template>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Recent Assets Section -->
+      <div class="side-section">
+        <mat-card class="dashboard-card">
+          <mat-card-header>
+            <mat-card-title>Recent Assets</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="asset-list" *ngIf="recentAssets.length > 0; else noRecentAssets">
+              <div class="asset-item" *ngFor="let asset of recentAssets">
+                <div class="asset-info">
+                  <strong>{{asset.symbol}}</strong>
+                  <span>{{asset.name}}</span>
+                  <span>Qty: {{asset.quantity}} | Price: {{asset.currentPrice | currency}}</span>
+                </div>
+              </div>
+            </div>
+            <ng-template #noRecentAssets>
+              <div class="placeholder-content">
+                <p>No assets found</p>
+              </div>
+            </ng-template>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- API Testing Section -->
+    <div class="test-section">
+      <mat-card class="dashboard-card">
+        <mat-card-header>
+          <mat-card-title>API Test Actions</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="test-actions">
+            <button mat-raised-button color="primary" (click)="testGetPortfolios()">
+              Test Get Portfolios
+            </button>
+            <button mat-raised-button color="accent" (click)="testGetCurrentUser()">
+              Test Get Current User
+            </button>
+            <button mat-raised-button color="warn" (click)="testMarketDataConnection()">
+              Test Market Data API
+            </button>
+            <button mat-raised-button (click)="refreshData()">
+              <mat-icon>refresh</mat-icon>
+              Refresh Data
+            </button>
+          </div>
+          <div class="loading-indicator" *ngIf="isLoading">
+            Loading portfolios...
+          </div>
+          <div class="loading-indicator" *ngIf="isLoadingMarketData">
+            Loading market data...
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div> 
