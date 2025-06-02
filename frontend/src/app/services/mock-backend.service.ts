@@ -1,6 +1,4 @@
-// Create this file: src/app/services/mock-backend.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable, of, delay } from 'rxjs';
 import { Portfolio, Asset } from './portfolio.service';
 import { User, LoginResponse, RegisterResponse } from './auth.service';

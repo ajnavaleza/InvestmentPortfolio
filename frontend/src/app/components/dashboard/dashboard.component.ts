@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { PortfolioService, Portfolio, Asset } from '../../services/portfolio.service';
 import { AuthService, User } from '../../services/auth.service';
+import { MockBackendService } from 'src/app/services/mock-backend.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -66,7 +67,7 @@ import { AuthService, User } from '../../services/auth.service';
           <mat-card class="dashboard-card">
             <mat-card-header>
               <mat-card-title>Portfolios</mat-card-title>
-              <button mat-button color="primary" (click)="createTestPortfolio()">
+              <button mat-button color="primary" (click)="mockCreatePortfolio()">
                 <mat-icon>add</mat-icon>
                 Create Test Portfolio
               </button>
@@ -261,8 +262,18 @@ export class DashboardComponent implements OnInit {
   constructor(
     private portfolioService: PortfolioService,
     private authService: AuthService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private mockBackend: MockBackendService
   ) {}
+
+  mockCreatePortfolio(): void {
+    this.mockBackend.mockCreatePortfolio({
+      totalValue: 10000,
+      assets: []
+    }).subscribe(portfolio => {
+      console.log('Created mock portfolio:', portfolio);
+    });
+  }
 
   ngOnInit(): void {
     this.loadCurrentUser();
