@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface Portfolio {
+  id?: number;
   totalValue: number;
   assets: Asset[];
   performance: PerformanceMetric[];
 }
 
 export interface Asset {
-  id: string;
+  id?: number;
   name: string;
   symbol: string;
   quantity: number;
@@ -20,58 +21,56 @@ export interface Asset {
 }
 
 export interface PerformanceMetric {
+  id?: number;
   date: string;
   value: number;
-  change: number;
+  percentageChange: number;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class PortfolioService {
-  private apiUrl = `${environment.apiUrl}/portfolio`;
+  private apiUrl = `${environment.apiUrl}/portfolios`;
+  private assetsUrl = `${environment.apiUrl}/assets`;
 
   constructor(private http: HttpClient) {}
 
-  // Get portfolio summary
-  getPortfolioSummary(): Observable<Portfolio> {
-    // TODO: Replace with actual API call
-    return of({
-      totalValue: 100000,
-      assets: [
-        {
-          id: '1',
-          name: 'Apple Inc.',
-          symbol: 'AAPL',
-          quantity: 100,
-          currentPrice: 150,
-          value: 15000,
-          allocation: 15
-        },
-        {
-          id: '2',
-          name: 'Microsoft Corporation',
-          symbol: 'MSFT',
-          quantity: 50,
-          currentPrice: 300,
-          value: 15000,
-          allocation: 15
-        }
-      ],
-      performance: [
-        {
-          date: '2024-01-01',
-          value: 95000,
-          change: -5
-        },
-        {
-          date: '2024-02-01',
-          value: 100000,
-          change: 5.26
-        }
-      ]
-    });
+  // Portfolio CRUD operations
+  getAllPortfolios(): Observable<Portfolio[]> {
+    return this.http.get<Portfolio[]>(this.apiUrl);
   }
 
-  // Add more portfolio-related methods here
-} 
+  getPortfolioById(id: number): Observable<Portfolio> {
+    return this.http.get<Portfolio>(`${this.apiUrl}/${id}`);
+  }
+
+  createPortfolio(portfolio: Partial<Portfolio>): Observable<Portfolio> {
+    return this.http.post<Portfolio>(this.apiUrl, portfolio);
+  }
+
+  updatePortfolio(id: number, portfolio: Partial<Portfolio>): Observable<Portfolio> {
+    return this.http.put<Portfolio>(`${this.apiUrl}/${id}`, portfolio);
+  }
+
+  deletePortfolio(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  // Asset operations
+  getAssetsByPortfolio(portfolioId: number): Observable<Asset[]> {
+    return this.http.get<Asset[]>(`${this.assetsUrl}/portfolio/${portfolioId}`);
+  }
+
+  addAssetToPortfolio(portfolioId: number, asset: Partial<Asset>): Observable<Asset> {
+    return this.http.post<Asset>(`${this.assetsUrl}/portfolio/${portfolioId}`, asset);
+  }
+
+  updateAsset(id: number, asset: Partial<Asset>): Observable<Asset> {
+    return this.http.put<Asset>(`${this.assetsUrl}/${id}`, asset);
+  }
+
+  deleteAsset(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.assetsUrl}/${id}`);
+  }
+}
