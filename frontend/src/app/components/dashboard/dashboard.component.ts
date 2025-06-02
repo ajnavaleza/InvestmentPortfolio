@@ -29,9 +29,11 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { PortfolioService, Portfolio, Asset } from '../../services/portfolio.service';
-import { AuthService, User } from '../../services/auth.service';
-import { MarketDataService, StockInfo, SearchResult } from '../../services/market-data.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { PortfolioService } from '../../core/services/portfolio.service';
+import { AuthService } from '../../core/services/auth.service';
+import { MarketDataService } from '../../core/services/market-data.service';
+import { Portfolio, Asset, User, StockInfo, SearchResult } from '../../core/interfaces';
 import { PortfolioFormComponent } from '../portfolio-form/portfolio-form.component';
 import { PortfolioItemComponent } from '../portfolio-item/portfolio-item.component';
 
@@ -50,6 +52,7 @@ import { PortfolioItemComponent } from '../portfolio-item/portfolio-item.compone
     MatDialogModule,
     MatExpansionModule,
     MatAutocompleteModule,
+    MatProgressSpinnerModule,
     PortfolioFormComponent,
     PortfolioItemComponent
   ],
@@ -66,7 +69,7 @@ export class DashboardComponent implements OnInit {
   // UI state management
   showCreatePortfolio = false;
   newPortfolioName = '';
-  showAddAsset: { [portfolioId: number]: boolean } = {};
+  showAddAsset: { [portfolioId: string]: boolean } = {};
   newAsset = {
     symbol: '',
     name: '',
@@ -88,6 +91,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.loadCurrentUser();
     this.loadPortfolios();
+    this.loadInitialStocks();
     
     // Subscribe to market data loading state
     this.marketDataService.isLoading.subscribe(loading => {
@@ -99,8 +103,17 @@ export class DashboardComponent implements OnInit {
    * Load current authenticated user information
    */
   loadCurrentUser(): void {
-    this.authService.currentUser$.subscribe(user=> {
-      this.currentUser = user;
+    console.log('Dashboard: Loading current user...');
+    this.authService.getCurrentUser().subscribe({
+      next: (user) => {
+        console.log('Dashboard: Current user loaded:', user);
+        console.log('Dashboard: User UID:', user.uid);
+        console.log('Dashboard: User structure:', JSON.stringify(user, null, 2));
+        this.currentUser = user;
+      },
+      error: (error) => {
+        console.error('Dashboard: Error loading current user:', error);
+      }
     });
   }
 
@@ -116,9 +129,9 @@ export class DashboardComponent implements OnInit {
         this.isLoading = false;
       },
       error: (error) => {
-        this.isLoading = false;
         console.error('Error loading portfolios:', error);
         this.snackBar.open('Error loading portfolios', 'Close', { duration: 3000 });
+        this.isLoading = false;
       }
     });
   }
@@ -129,11 +142,32 @@ export class DashboardComponent implements OnInit {
   loadRecentAssets(): void {
     this.recentAssets = [];
     this.portfolios.forEach(portfolio => {
-      if (portfolio.assets) {
-        this.recentAssets.push(...portfolio.assets);
+      if (portfolio.assets && portfolio.assets.length > 0) {
+        // Get the last 3 assets from each portfolio
+        const lastAssets = portfolio.assets.slice(-3);
+        this.recentAssets = [...this.recentAssets, ...lastAssets];
       }
     });
-    this.recentAssets = this.recentAssets.slice(0, 5);
+  }
+
+  /**
+   * Log out current user
+   */
+  logout(): void {
+    console.log('Dashboard: Starting logout process...');
+    this.authService.logout().subscribe({
+      next: () => {
+        console.log('Dashboard: Logout successful');
+        this.snackBar.open('Logged out successfully', 'Close', { duration: 2000 });
+        // Don't reload page - let router handle navigation
+      },
+      error: (error) => {
+        console.error('Dashboard: Logout error:', error);
+        this.snackBar.open('Logout failed, but clearing local data', 'Close', { duration: 3000 });
+        // Still redirect to login even if logout fails
+        window.location.href = '/login';
+      }
+    });
   }
 
   /**
@@ -145,20 +179,34 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    const portfolio = {
-      name: this.newPortfolioName.trim(),
-      totalValue: 0
+    console.log('Creating portfolio for user:', this.currentUser);
+
+    const portfolioData = {
+      name: this.newPortfolioName,
+      description: `Portfolio created on ${new Date().toLocaleDateString()}`
     };
 
-    this.portfolioService.createPortfolio(portfolio).subscribe({
+    this.portfolioService.createPortfolio(portfolioData).subscribe({
       next: (portfolio) => {
+        console.log('Portfolio created successfully:', portfolio);
         this.snackBar.open('Portfolio created successfully!', 'Close', { duration: 3000 });
-        this.loadPortfolios();
-        this.cancelCreatePortfolio();
+        this.portfolios.push(portfolio);
+        this.newPortfolioName = '';
+        this.showCreatePortfolio = false;
       },
       error: (error) => {
         console.error('Error creating portfolio:', error);
-        this.snackBar.open('Error creating portfolio', 'Close', { duration: 3000 });
+        if (error.message === 'User not authenticated') {
+          this.snackBar.open('Authentication required. Please log in again.', 'Login', { 
+            duration: 5000 
+          }).onAction().subscribe(() => {
+            this.logout();
+          });
+        } else {
+          this.snackBar.open('Error creating portfolio: ' + (error.message || 'Unknown error'), 'Close', { 
+            duration: 5000 
+          });
+        }
       }
     });
   }
@@ -174,27 +222,30 @@ export class DashboardComponent implements OnInit {
   /**
    * Initialize asset addition for a specific portfolio
    */
-  toggleAddAsset(portfolioId: number): void {
-    this.showAddAsset[portfolioId] = true;
-    this.resetNewAsset();
-    // Start with some popular stocks for initial display
-    this.loadInitialStocks();
+  toggleAddAsset(portfolioId: string | number): void {
+    const id = portfolioId.toString();
+    this.showAddAsset[id] = !this.showAddAsset[id];
+    if (this.showAddAsset[id]) {
+      this.resetNewAsset();
+    }
   }
 
   /**
    * Add a new asset to the specified portfolio
    */
-  addAsset(portfolioId: number): void {
-    if (!this.newAsset.symbol || !this.newAsset.name || this.newAsset.quantity <= 0 || this.newAsset.currentPrice <= 0) {
-      this.snackBar.open('Please fill in all asset fields with valid values', 'Close', { duration: 3000 });
+  addAsset(portfolioId: string | number): void {
+    const id = portfolioId.toString();
+    if (!this.newAsset.symbol || this.newAsset.quantity <= 0 || this.newAsset.currentPrice <= 0) {
+      this.snackBar.open('Please fill in all asset details', 'Close', { duration: 3000 });
       return;
     }
 
-    this.portfolioService.addAssetToPortfolio(portfolioId, this.newAsset).subscribe({
-      next: (asset) => {
+    this.portfolioService.addAsset(id, this.newAsset).subscribe({
+      next: () => {
         this.snackBar.open('Asset added successfully!', 'Close', { duration: 3000 });
         this.loadPortfolios();
-        this.cancelAddAsset(portfolioId);
+        this.resetNewAsset();
+        this.showAddAsset[id] = false;
       },
       error: (error) => {
         console.error('Error adding asset:', error);
@@ -206,9 +257,10 @@ export class DashboardComponent implements OnInit {
   /**
    * Cancel asset addition for a specific portfolio
    */
-  cancelAddAsset(portfolioId: number): void {
-    this.showAddAsset[portfolioId] = false;
+  cancelAddAsset(portfolioId: string | number): void {
+    const id = portfolioId.toString();
     this.resetNewAsset();
+    this.showAddAsset[id] = false;
   }
 
   /**
@@ -245,13 +297,13 @@ export class DashboardComponent implements OnInit {
       next: (stockInfo) => {
         this.newAsset.symbol = stockInfo.symbol;
         this.newAsset.name = stockInfo.name;
-        this.newAsset.currentPrice = stockInfo.currentPrice;
+        this.newAsset.currentPrice = stockInfo.currentPrice || 0;
         this.isLoadingMarketData = false;
         
         if (stockInfo.change !== undefined) {
           const changeText = stockInfo.change >= 0 ? '+' : '';
           this.snackBar.open(
-            `${stockInfo.symbol}: $${stockInfo.currentPrice} (${changeText}${stockInfo.change?.toFixed(2)})`,
+            `${stockInfo.symbol}: $${stockInfo.currentPrice || 0} (${changeText}${stockInfo.change?.toFixed(2)})`,
             'Close',
             { duration: 3000 }
           );
@@ -259,7 +311,6 @@ export class DashboardComponent implements OnInit {
       },
       error: (error) => {
         this.isLoadingMarketData = false;
-        console.error('Error fetching stock info:', error);
         this.snackBar.open('Failed to load live stock data, using cached info', 'Close', { duration: 3000 });
         
         // Try to find in filtered stocks for basic info
@@ -279,14 +330,13 @@ export class DashboardComponent implements OnInit {
   /**
    * Delete an asset by ID
    */
-  deleteAsset(assetId: number): void {
-    this.portfolioService.deleteAsset(assetId).subscribe({
+  deleteAsset(portfolioId: string | number, assetId: string | number): void {
+    this.portfolioService.deleteAsset(portfolioId.toString(), assetId.toString()).subscribe({
       next: () => {
         this.snackBar.open('Asset deleted successfully!', 'Close', { duration: 3000 });
         this.loadPortfolios();
       },
       error: (error) => {
-        console.error('Error deleting asset:', error);
         this.snackBar.open('Error deleting asset', 'Close', { duration: 3000 });
       }
     });
@@ -295,14 +345,13 @@ export class DashboardComponent implements OnInit {
   /**
    * Delete a portfolio by ID
    */
-  deletePortfolio(id: number): void {
-    this.portfolioService.deletePortfolio(id).subscribe({
+  deletePortfolio(id: string | number): void {
+    this.portfolioService.deletePortfolio(id.toString()).subscribe({
       next: () => {
         this.snackBar.open('Portfolio deleted successfully!', 'Close', { duration: 3000 });
         this.loadPortfolios();
       },
       error: (error) => {
-        console.error('Error deleting portfolio:', error);
         this.snackBar.open('Error deleting portfolio', 'Close', { duration: 3000 });
       }
     });
@@ -314,11 +363,9 @@ export class DashboardComponent implements OnInit {
   testGetPortfolios(): void {
     this.portfolioService.getAllPortfolios().subscribe({
       next: (portfolios) => {
-        console.log('Test - Get Portfolios Response:', portfolios);
         this.snackBar.open(`API Test: Found ${portfolios.length} portfolios`, 'Close', { duration: 3000 });
       },
       error: (error) => {
-        console.error('Test - Get Portfolios Error:', error);
         this.snackBar.open('API Test Failed: Check console for details', 'Close', { duration: 3000 });
       }
     });
@@ -330,11 +377,9 @@ export class DashboardComponent implements OnInit {
   testGetCurrentUser(): void {
     this.authService.getCurrentUser().subscribe({
       next: (user) => {
-        console.log('Test - Get Current User Response:', user);
-        this.snackBar.open(`API Test: Current user is ${user.username}`, 'Close', { duration: 3000 });
+        this.snackBar.open(`API Test: Current user is ${user.displayName || user.email}`, 'Close', { duration: 3000 });
       },
       error: (error) => {
-        console.error('Test - Get Current User Error:', error);
         this.snackBar.open('API Test Failed: Check console for details', 'Close', { duration: 3000 });
       }
     });
@@ -345,14 +390,6 @@ export class DashboardComponent implements OnInit {
    */
   refreshData(): void {
     this.loadPortfolios();
-  }
-
-  /**
-   * Log out current user and reload page
-   */
-  logout(): void {
-    this.authService.logout();
-    window.location.reload();
   }
 
   /**
@@ -373,13 +410,11 @@ export class DashboardComponent implements OnInit {
    * Search for live stocks using the market data service
    */
   private searchLiveStocks(query: string): void {
-    this.marketDataService.searchStocks(query).subscribe({
+    this.marketDataService.searchStocksBasic(query).subscribe({
       next: (results) => {
-        this.filteredStocks = results.slice(0, 10); // Limit to 10 results
+        this.filteredStocks = results;
       },
       error: (error) => {
-        console.error('Error searching stocks:', error);
-        // Keep existing filtered stocks or clear them
         this.filteredStocks = [];
       }
     });
@@ -396,7 +431,11 @@ export class DashboardComponent implements OnInit {
       name: stock.name,
       type: 'Equity',
       region: 'United States',
-      currency: 'USD'
+      currency: 'USD',
+      marketOpen: '09:30',
+      marketClose: '16:00',
+      timezone: 'EST',
+      matchScore: 1.0
     }));
   }
 
@@ -409,13 +448,12 @@ export class DashboardComponent implements OnInit {
     this.marketDataService.getStockInfo('AAPL').subscribe({
       next: (stockInfo) => {
         this.snackBar.open(
-          `Market Data Test: AAPL = $${stockInfo.currentPrice} (Updated: ${stockInfo.lastUpdated})`,
+          `Market Data Test: AAPL = $${stockInfo.currentPrice || 0} (Updated: ${stockInfo.lastUpdated || 'N/A'})`,
           'Close',
           { duration: 5000 }
         );
       },
       error: (error) => {
-        console.error('Market data test failed:', error);
         this.snackBar.open('Market Data Test Failed: Using fallback data', 'Close', { duration: 3000 });
       }
     });

@@ -1,0 +1,169 @@
+<div class="analysis-container">
+  <div class="analysis-header">
+    <div class="header-content">
+      <h1>Portfolio Analysis</h1>
+      <div class="header-actions">
+        <mat-form-field appearance="outline" *ngIf="portfolios.length > 0">
+          <mat-label>Select Portfolio</mat-label>
+          <mat-select [(ngModel)]="selectedPortfolioId" (selectionChange)="onPortfolioChange()">
+            <mat-option *ngFor="let portfolio of portfolios" [value]="portfolio.id">
+              {{portfolio.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button mat-button color="primary" (click)="refreshAnalysis()">
+          <mat-icon>refresh</mat-icon>
+          Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="analysis-content" *ngIf="!isLoading">
+    <!-- Performance Overview -->
+    <div class="overview-section">
+      <mat-card class="overview-card" *ngIf="analysisData">
+        <mat-card-header>
+          <mat-card-title>Performance Overview</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="overview-stats">
+            <div class="stat-item">
+              <span class="stat-label">Total Value</span>
+              <span class="stat-value">${{analysisData.totalValue.toLocaleString()}}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Total Return</span>
+              <span class="stat-value" [style.color]="analysisData.totalReturn >= 0 ? 'green' : 'red'">
+                ${{analysisData.totalReturn.toLocaleString()}} ({{analysisData.totalReturnPercent.toFixed(2)}}%)
+              </span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Today's Change</span>
+              <span class="stat-value" [style.color]="analysisData.dayChange >= 0 ? 'green' : 'red'">
+                ${{analysisData.dayChange.toLocaleString()}} ({{analysisData.dayChangePercent.toFixed(2)}}%)
+              </span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Diversification Score</span>
+              <span class="stat-value">{{analysisData.diversificationScore.toFixed(0)}}/100</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="metrics-section">
+      <mat-card class="metrics-card">
+        <mat-card-header>
+          <mat-card-title>Key Performance Metrics</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="metrics-grid">
+            <div class="metric-item" *ngFor="let metric of performanceMetrics">
+              <div class="metric-header">
+                <mat-icon [style.color]="getTrendColor(metric.trend)">
+                  {{getTrendIcon(metric.trend)}}
+                </mat-icon>
+                <span class="metric-label">{{metric.label}}</span>
+              </div>
+              <div class="metric-value">{{metric.value}}</div>
+              <div class="metric-description">{{metric.description}}</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Asset Allocation -->
+    <div class="allocation-section">
+      <mat-card class="allocation-card">
+        <mat-card-header>
+          <mat-card-title>Asset Allocation</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="allocation-content">
+            <div class="allocation-chart">
+              <div class="pie-chart" [style]="generatePieChartStyle()">
+              </div>
+            </div>
+            <div class="allocation-legend">
+              <div class="legend-item" *ngFor="let asset of assetAllocation">
+                <div class="legend-color" [style.background-color]="asset.color"></div>
+                <div class="legend-details">
+                  <span class="legend-symbol">{{asset.symbol}}</span>
+                  <span class="legend-name">{{asset.name}}</span>
+                  <span class="legend-percentage">{{asset.percentage.toFixed(1)}}%</span>
+                  <span class="legend-value">${{asset.value.toLocaleString()}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Top/Worst Performers -->
+    <div class="performers-section" *ngIf="analysisData?.topPerformer && analysisData?.worstPerformer">
+      <div class="performers-grid">
+        <mat-card class="performer-card top-performer">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon style="color: green;">trending_up</mat-icon>
+              Top Performer
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="performer-details">
+              <span class="performer-symbol">{{analysisData?.topPerformer?.symbol}}</span>
+              <span class="performer-name">{{analysisData?.topPerformer?.name}}</span>
+              <span class="performer-price">${{analysisData?.topPerformer?.currentPrice}}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="performer-card worst-performer">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon style="color: red;">trending_down</mat-icon>
+              Needs Attention
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="performer-details">
+              <span class="performer-symbol">{{analysisData?.worstPerformer?.symbol}}</span>
+              <span class="performer-name">{{analysisData?.worstPerformer?.name}}</span>
+              <span class="performer-price">${{analysisData?.worstPerformer?.currentPrice}}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-card>
+      <mat-card-content>
+        <div class="loading-content">
+          <mat-icon>analytics</mat-icon>
+          <p>Analyzing portfolio data...</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && portfolios.length === 0">
+    <mat-card>
+      <mat-card-content>
+        <div class="empty-content">
+          <mat-icon>assessment</mat-icon>
+          <h2>No Portfolios Found</h2>
+          <p>Create a portfolio from the dashboard to start analyzing your investments.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div> 

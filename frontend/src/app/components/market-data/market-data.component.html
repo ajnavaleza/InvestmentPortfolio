@@ -1,0 +1,114 @@
+<div class="market-data-container">
+  <div class="market-header">
+    <div class="header-content">
+      <h1>Market Data</h1>
+      <div class="header-actions">
+        <button mat-button color="primary" (click)="testApiConnection()">
+          <mat-icon>bug_report</mat-icon>
+          Test API
+        </button>
+        <button mat-button color="primary" (click)="loadMarketData()">
+          <mat-icon>refresh</mat-icon>
+          Refresh Data
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="market-content">
+    <div class="search-section">
+      <input type="text" 
+             [(ngModel)]="searchQuery" 
+             placeholder="Search for stocks..." 
+             class="search-input"
+             (keyup.enter)="searchStocks()">
+      <button class="search-button" 
+              (click)="searchStocks()"
+              [disabled]="loading.search">
+        <mat-icon>search</mat-icon>
+        Search
+      </button>
+    </div>
+
+    <!-- Search Results -->
+    <div class="search-results" *ngIf="searchResult || loading.search || error.search">
+      <div class="market-card">
+        <h2>Search Results</h2>
+        <div class="stock-info" *ngIf="searchResult">
+          <div class="stock-header">
+            <span class="symbol">{{searchResult.symbol}}</span>
+            <span class="price">${{formatPrice(searchResult.price)}}</span>
+          </div>
+          <div class="stock-details">
+            <span class="change" [style.color]="getChangeColor(searchResult.change)">
+              {{formatChange(searchResult.change, searchResult.changePercent)}}
+            </span>
+            <span class="volume" *ngIf="searchResult.volume">
+              Volume: {{searchResult.volume.toLocaleString()}}
+            </span>
+          </div>
+        </div>
+        <p class="loading-text" *ngIf="loading.search">Searching...</p>
+        <p class="error-text" *ngIf="error.search">{{error.search}}</p>
+      </div>
+    </div>
+
+    <div class="market-grid">
+      <!-- Market Overview Section -->
+      <div class="market-card">
+        <h2>Market Overview</h2>
+        <div class="market-indices">
+          <div class="index-item" *ngFor="let index of marketIndices">
+            <span class="index-name">{{index.symbol}}</span>
+            <div class="index-details">
+              <span class="price">${{formatPrice(index.price)}}</span>
+              <span class="change" [style.color]="getChangeColor(index.change)">
+                {{formatChange(index.change, index.changePercent)}}
+              </span>
+            </div>
+          </div>
+          <p class="loading-text" *ngIf="loading.indices">Loading market indices...</p>
+          <p class="error-text" *ngIf="error.indices">{{error.indices}}</p>
+        </div>
+      </div>
+
+      <!-- Trending Stocks Section -->
+      <div class="market-card">
+        <h2>Trending Stocks</h2>
+        <div class="trending-stocks">
+          <div class="stock-item" *ngFor="let stock of trendingStocks">
+            <div class="stock-header">
+              <span class="symbol">{{stock.symbol}}</span>
+              <span class="price">${{formatPrice(stock.price)}}</span>
+            </div>
+            <div class="stock-details">
+              <span class="change" [style.color]="getChangeColor(stock.change)">
+                {{formatChange(stock.change, stock.changePercent)}}
+              </span>
+            </div>
+          </div>
+          <p class="loading-text" *ngIf="loading.trending">Loading trending stocks...</p>
+          <p class="error-text" *ngIf="error.trending">{{error.trending}}</p>
+        </div>
+      </div>
+
+      <!-- Market News Section -->
+      <div class="market-card">
+        <h2>Market News</h2>
+        <div class="news-feed">
+          <div class="news-item" *ngFor="let news of marketNews">
+            <h3>
+              <a [href]="news.url" target="_blank" rel="noopener noreferrer">
+                {{news.title}}
+              </a>
+            </h3>
+            <p class="news-source">{{news.source}} - {{(news.publishedAt || news.timePublished) | date:'medium'}}</p>
+            <p class="news-summary">{{news.summary}}</p>
+          </div>
+          <p class="loading-text" *ngIf="loading.news">Loading market news...</p>
+          <p class="error-text" *ngIf="error.news">{{error.news}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

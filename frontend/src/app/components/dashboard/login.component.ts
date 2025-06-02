@@ -1,14 +1,15 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
-import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatTabsModule } from '@angular/material/tabs';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
+import { LoginRequest } from '../../core/interfaces';
 
 @Component({
   selector: 'app-login',
@@ -16,11 +17,12 @@ import { AuthService } from '../../services/auth.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterModule,
     MatCardModule,
     MatInputModule,
     MatButtonModule,
     MatFormFieldModule,
-    MatTabsModule,
+    MatIconModule,
     MatSnackBarModule
   ],
   template: `
@@ -28,70 +30,55 @@ import { AuthService } from '../../services/auth.service';
       <mat-card class="login-card">
         <mat-card-header>
           <mat-card-title>Investment Portfolio</mat-card-title>
+          <mat-card-subtitle>Sign in to your account</mat-card-subtitle>
         </mat-card-header>
         
-        <mat-tab-group>
-          <mat-tab label="Login">
-            <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="form-container">
-              <mat-form-field appearance="outline">
-                <mat-label>Username</mat-label>
-                <input matInput formControlName="username" required>
-                <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
-                  Username is required
-                </mat-error>
-              </mat-form-field>
+        <mat-card-content>
+          <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Email</mat-label>
+              <input matInput type="email" formControlName="email" required>
+              <mat-icon matSuffix>email</mat-icon>
+              <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
+                Email is required
+              </mat-error>
+              <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
+                Please enter a valid email
+              </mat-error>
+            </mat-form-field>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Password</mat-label>
-                <input matInput type="password" formControlName="password" required>
-                <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
-                  Password is required
-                </mat-error>
-              </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Password</mat-label>
+              <input matInput [type]="hidePassword ? 'password' : 'text'" 
+                     formControlName="password" required>
+              <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" 
+                      [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword">
+                <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+              </button>
+              <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+                Password is required
+              </mat-error>
+            </mat-form-field>
 
+            <div class="form-actions">
               <button mat-raised-button color="primary" type="submit" 
-                      [disabled]="loginForm.invalid || isLogging">
-                {{isLogging ? 'Logging in...' : 'Login'}}
+                      [disabled]="loginForm.invalid || isLoading" class="full-width">
+                <mat-icon *ngIf="isLoading">refresh</mat-icon>
+                {{isLoading ? 'Signing in...' : 'Sign In'}}
               </button>
-            </form>
-          </mat-tab>
+            </div>
+          </form>
 
-          <mat-tab label="Register">
-            <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="form-container">
-              <mat-form-field appearance="outline">
-                <mat-label>Username</mat-label>
-                <input matInput formControlName="username" required>
-                <mat-error *ngIf="registerForm.get('username')?.hasError('required')">
-                  Username is required
-                </mat-error>
-              </mat-form-field>
+          <div class="register-link">
+            <p>Don't have an account? <a routerLink="/register">Create one here</a></p>
+          </div>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Email</mat-label>
-                <input matInput type="email" formControlName="email">
-                <mat-error *ngIf="registerForm.get('email')?.hasError('email')">
-                  Please enter a valid email
-                </mat-error>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>Password</mat-label>
-                <input matInput type="password" formControlName="password" required>
-                <mat-error *ngIf="registerForm.get('password')?.hasError('required')">
-                  Password is required
-                </mat-error>
-                <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">
-                  Password must be at least 6 characters
-                </mat-error>
-              </mat-form-field>
-
-              <button mat-raised-button color="accent" type="submit" 
-                      [disabled]="registerForm.invalid || isRegistering">
-                {{isRegistering ? 'Registering...' : 'Register'}}
-              </button>
-            </form>
-          </mat-tab>
-        </mat-tab-group>
+          <div class="demo-info">
+            <h4>Demo Credentials:</h4>
+            <p><strong>Email:</strong> test@test.com</p>
+            <p><strong>Password:</strong> password</p>
+          </div>
+        </mat-card-content>
       </mat-card>
     </div>
   `,
@@ -102,43 +89,76 @@ import { AuthService } from '../../services/auth.service';
       align-items: center;
       min-height: 100vh;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 20px;
+      padding: 2rem;
     }
 
     .login-card {
       width: 100%;
       max-width: 400px;
-      padding: 20px;
+      padding: 2rem;
     }
 
-    .form-container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      padding: 20px 0;
-    }
-
-    mat-form-field {
+    .full-width {
       width: 100%;
     }
 
-    button {
-      height: 48px;
-      font-size: 16px;
+    .form-actions {
+      margin-top: 1rem;
+    }
+
+    .register-link {
+      text-align: center;
+      margin-top: 1rem;
+      
+      a {
+        color: #3f51b5;
+        text-decoration: none;
+        
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .demo-info {
+      margin-top: 2rem;
+      padding: 1rem;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      border-left: 4px solid #3f51b5;
+
+      h4 {
+        margin: 0 0 0.5rem 0;
+        color: #3f51b5;
+      }
+
+      p {
+        margin: 0.25rem 0;
+        font-size: 0.9rem;
+      }
+    }
+
+    mat-form-field {
+      margin-bottom: 1rem;
+    }
+
+    mat-icon[matSuffix] {
+      cursor: pointer;
     }
 
     mat-card-title {
       text-align: center;
-      color: #333;
-      margin-bottom: 20px;
+    }
+
+    mat-card-subtitle {
+      text-align: center;
     }
   `]
 })
 export class LoginComponent {
   loginForm: FormGroup;
-  registerForm: FormGroup;
-  isLogging = false;
-  isRegistering = false;
+  hidePassword = true;
+  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -147,53 +167,36 @@ export class LoginComponent {
     private snackBar: MatSnackBar
   ) {
     this.loginForm = this.fb.group({
-      username: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
-    });
-
-    this.registerForm = this.fb.group({
-      username: ['', Validators.required],
-      email: ['', Validators.email],
-      password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
   onLogin(): void {
     if (this.loginForm.valid) {
-      this.isLogging = true;
-      const { username, password } = this.loginForm.value;
+      this.isLoading = true;
       
-      this.authService.login(username, password).subscribe({
+      const loginData: LoginRequest = {
+        email: this.loginForm.value.email,
+        password: this.loginForm.value.password
+      };
+      
+      this.authService.login(loginData).subscribe({
         next: (response) => {
-          this.isLogging = false;
-          this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
-          this.router.navigate(['/dashboard']);
+          this.isLoading = false;
+          this.snackBar.open('Login successful!', 'Close', { 
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          });
+          this.router.navigate(['/home']);
         },
         error: (error) => {
-          this.isLogging = false;
-          this.snackBar.open('Login failed. Please check your credentials.', 'Close', { duration: 5000 });
-          console.error('Login error:', error);
-        }
-      });
-    }
-  }
-
-  onRegister(): void {
-    if (this.registerForm.valid) {
-      this.isRegistering = true;
-      const userData = this.registerForm.value;
-      
-      this.authService.register(userData).subscribe({
-        next: (response) => {
-          this.isRegistering = false;
-          this.snackBar.open('Registration successful! You are now logged in.', 'Close', { duration: 3000 });
-          this.router.navigate(['/dashboard']);
-        },
-        error: (error) => {
-          this.isRegistering = false;
-          const errorMessage = error.error?.error || 'Registration failed. Please try again.';
-          this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
-          console.error('Registration error:', error);
+          this.isLoading = false;
+          const errorMessage = error.error?.message || 'Login failed. Please check your credentials.';
+          this.snackBar.open(errorMessage, 'Close', { 
+            duration: 5000,
+            panelClass: ['error-snackbar']
+          });
         }
       });
     }

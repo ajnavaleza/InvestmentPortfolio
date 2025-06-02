@@ -1,0 +1,275 @@
+.analysis-container {
+  padding: 2rem;
+  height: 100%;
+
+  .analysis-header {
+    margin-bottom: 2rem;
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+
+      h1 {
+        font-size: 2rem;
+        color: #333;
+        margin: 0;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        mat-form-field {
+          min-width: 200px;
+        }
+
+        button {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+        }
+      }
+    }
+  }
+
+  .analysis-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .overview-section {
+    .overview-card {
+      .overview-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+
+        .stat-item {
+          text-align: center;
+          padding: 1rem;
+          border-radius: 8px;
+          background-color: #f8f9fa;
+
+          .stat-label {
+            display: block;
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+          }
+
+          .stat-value {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+          }
+        }
+      }
+    }
+  }
+
+  .metrics-section {
+    .metrics-card {
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+
+        .metric-item {
+          padding: 1rem;
+          border-radius: 8px;
+          background-color: #f8f9fa;
+
+          .metric-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+
+            .metric-label {
+              font-weight: 500;
+              color: #333;
+            }
+          }
+
+          .metric-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+          }
+
+          .metric-description {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.4;
+          }
+        }
+      }
+    }
+  }
+
+  .allocation-section {
+    .allocation-card {
+      .allocation-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: center;
+
+        @media (max-width: 768px) {
+          grid-template-columns: 1fr;
+        }
+
+        .allocation-chart {
+          display: flex;
+          justify-content: center;
+
+          .pie-chart {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            position: relative;
+            border: 2px solid #e0e0e0;
+          }
+        }
+
+        .allocation-legend {
+          .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+
+            .legend-color {
+              width: 16px;
+              height: 16px;
+              border-radius: 50%;
+              flex-shrink: 0;
+            }
+
+            .legend-details {
+              display: grid;
+              grid-template-columns: 60px 1fr auto auto;
+              gap: 0.5rem;
+              align-items: center;
+              width: 100%;
+
+              .legend-symbol {
+                font-weight: 600;
+                color: #333;
+              }
+
+              .legend-name {
+                color: #666;
+                font-size: 0.9rem;
+              }
+
+              .legend-percentage {
+                font-weight: 500;
+                color: #333;
+                text-align: right;
+              }
+
+              .legend-value {
+                font-weight: 500;
+                color: #333;
+                text-align: right;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .performers-section {
+    .performers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+
+      .performer-card {
+        .performer-details {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+
+          .performer-symbol {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+          }
+
+          .performer-name {
+            color: #666;
+            font-size: 0.9rem;
+          }
+
+          .performer-price {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #333;
+          }
+        }
+      }
+    }
+  }
+
+  .loading-container,
+  .empty-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+
+    mat-card {
+      max-width: 400px;
+      text-align: center;
+
+      .loading-content,
+      .empty-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+
+        mat-icon {
+          font-size: 3rem;
+          width: 3rem;
+          height: 3rem;
+          color: #666;
+        }
+
+        h2 {
+          margin: 0;
+          color: #333;
+        }
+
+        p {
+          margin: 0;
+          color: #666;
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+} 

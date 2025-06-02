@@ -1,76 +1,207 @@
-# Investment Portfolio Management System
+# Investment Portfolio Application
 
-A comprehensive investment portfolio management application that provides real-time market data, portfolio analysis, and investment recommendations.
+> **Modern Angular 16 + Firebase Investment Portfolio Management System**
 
-## Features
+[![Angular](https://img.shields.io/badge/Angular-16-red?style=flat-square&logo=angular)](https://angular.io/)
+[![Firebase](https://img.shields.io/badge/Firebase-Latest-orange?style=flat-square&logo=firebase)](https://firebase.google.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Material UI](https://img.shields.io/badge/Material_UI-Latest-purple?style=flat-square&logo=material-ui)](https://material.angular.io/)
 
-- Real-time portfolio tracking and analysis
-- Market data integration
-- Risk analysis and diversification recommendations
-- Dynamic data visualization
-- User authentication and portfolio management
+---
 
-## Tech Stack
+## **Project Overview**
 
-### Frontend
-- Angular 16
-- D3.js for data visualization
-- Angular Material for UI components
+A comprehensive investment portfolio tracking application built with modern web technologies. Features real-time market data integration, portfolio analytics, and secure user authentication.
 
-### Backend
-- Java 17
-- Spring Boot 3.x
-- MySQL 8.0
-- Spring Security for authentication
+### ✨ **Key Features**
+- **Firebase Authentication** (Email/password, secure login)
+- **Portfolio Management** (Create, manage multiple portfolios)
+- **Real-time Market Data** (Alpha Vantage API integration)
+- **Advanced Analytics** (Performance metrics, asset allocation)
+- **Cloud Database** (Firestore real-time sync)
 
-### DevOps
-- Docker
-- Jenkins
-- Azure Cloud Services
+###  **Firebase-Only Backend**
+- **Authentication**: Firebase Auth with JWT tokens
+- **Database**: Firestore NoSQL (real-time sync)
+- **Hosting**: Firebase Hosting (optional)
 
-## Prerequisites
-
-- Node.js (v18 or higher)
-- Java JDK 17
-- Maven
-- MySQL 8.0
-- Docker
-
-## Project Structure
-
+### **Frontend Structure**
 ```
-investment-portfolio/
-├── frontend/           # Angular frontend application
-├── backend/           # Spring Boot backend application
-├── docker/            # Docker configuration files
-└── docs/             # Project documentation
+frontend/
+├── src/app/
+│   ├── core/              # Services, guards, interceptors
+│   ├── components/        # Feature components
+│   ├── environments/      # Configuration
+│   └── ARCHITECTURE.md    # Detailed code structure
+├── DEVELOPMENT_GUIDE.md   # Developer navigation guide
+└── README.md              # Frontend documentation
 ```
 
-## Getting Started
+---
 
-1. Clone the repository
-2. Set up the backend:
-   ```bash
-   cd backend
-   mvn clean install
-   ```
-3. Set up the frontend:
-   ```bash
-   cd frontend
-   npm install
-   ```
-4. Start the development servers:
-   - Backend: `mvn spring-boot:run`
-   - Frontend: `ng serve`
+## **Quick Start**
 
-## API Documentation
+### **Prerequisites**
+- Node.js 16+ and npm
+- Firebase account (free tier available)
+- Alpha Vantage API key (free tier: 5 requests/minute)
 
-The API documentation is available at `/swagger-ui.html` when running the backend server.
+### **Setup**
+```bash
+# 1. Clone and navigate
+cd InvestmentPortfolio/frontend
 
-## Deployment
+# 2. Install dependencies
+npm install
 
-The application can be deployed using Docker containers and Azure Cloud Services. Detailed deployment instructions are available in the `docker/` directory.
+# 3. Configure environment
+# Edit: src/environments/environment.ts
+# Add your Firebase config and Alpha Vantage API key
 
-## License
+# 4. Start development
+ng serve --port 4200
 
-MIT License 
+# 5. Open browser
+# http://localhost:4200
+```
+
+---
+
+## **Project Structure**
+
+### **Root Directory (Clean & Organized)**
+```
+InvestmentPortfolio/
+├── frontend/                    # Complete Angular application
+│   ├── src/app/core/           # Business logic & services
+│   ├── src/app/components/     # UI components
+│   ├── ARCHITECTURE.md         # Code structure guide
+│   ├── DEVELOPMENT_GUIDE.md    # Developer navigation
+│   └── README.md               # Frontend documentation
+├── .git/                       # Git repository
+├── .gitignore                  # Git ignore rules
+├── package.json                # Root dependencies
+└── README.md                   # This file
+```
+
+## **Technology Stack**
+
+### **Frontend**
+- **Framework**: Angular 16 (Standalone components)
+- **UI Library**: Angular Material + CDK
+- **Styling**: SCSS with Material Design
+- **State Management**: RxJS Observables
+- **HTTP Client**: Angular HttpClient
+- **Forms**: Angular Reactive Forms
+
+### **Backend & APIs**
+- **Authentication**: Firebase Auth
+- **Database**: Cloud Firestore
+- **Market Data**: Alpha Vantage API
+- **File Storage**: Firebase Storage (if needed)
+
+### **Development Tools**
+- **Language**: TypeScript 5.0
+- **Build System**: Angular CLI + Webpack
+- **Linting**: ESLint + Angular rules
+- **Testing**: Jasmine + Karma (unit tests)
+
+---
+
+## **Features Overview**
+
+### **Authentication System**
+- Secure email/password registration and login
+- Route guards for protected pages
+- Automatic session management
+
+### **Portfolio Management**
+- Create and manage multiple portfolios
+- Add/remove assets with real-time pricing
+- Portfolio performance calculations
+- Asset allocation tracking
+
+### **Market Data Integration**
+- Live stock quotes from Alpha Vantage
+- Market indices tracking (S&P 500, NASDAQ, DOW)
+- Stock search with autocomplete
+- Trending stocks and market news
+
+### **Analytics Dashboard**
+- Portfolio performance metrics
+- Asset allocation visualization
+- Diversification scoring
+- Interactive charts and graphs
+
+---
+
+## **Development Workflow**
+
+### **Daily Development**
+```bash
+# Start development server
+cd frontend && ng serve --port 4200
+
+# Run tests
+ng test
+
+# Check code quality
+ng lint
+
+# Build for production
+ng build --prod
+```
+
+### **Documentation Navigation**
+- **Architecture Overview**: `frontend/src/app/ARCHITECTURE.md`
+- **Development Guide**: `frontend/DEVELOPMENT_GUIDE.md`
+- **Setup Instructions**: `frontend/README.md`
+
+---
+
+## **Deployment**
+
+### **Firebase Hosting**
+```bash
+# Build for production
+cd frontend && ng build --prod
+
+# Deploy to Firebase
+firebase deploy
+```
+
+### **Other Platforms**
+```bash
+# Build production bundle
+ng build --prod
+
+# Deploy 'dist/' folder to your hosting provider
+```
+
+---
+
+## **Configuration**
+
+### **Environment Setup**
+Update `frontend/src/environments/environment.ts`:
+```typescript
+export const environment = {
+  production: false,
+  firebase: {
+    apiKey: "your-firebase-api-key",
+    authDomain: "your-project.firebaseapp.com",
+    projectId: "your-project-id",
+    // ... other Firebase config
+  },
+  marketDataApiKey: 'your-alpha-vantage-key',
+  useFirebase: true
+};
+
+---
+
+## **Getting Started**
+
+1. **Navigate to frontend**: `cd frontend`
+2. **Read setup guide**: Check `README.md` in frontend folder
+3. **Configure APIs**: Update environment files
+4. **Start developing**: `ng serve --port 4200`

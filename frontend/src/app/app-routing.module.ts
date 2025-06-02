@@ -1,21 +1,37 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AuthGuard } from './components/dashboard/auth.guard';
+import { AuthGuard } from './core/guards/auth.guard';
 
-const routes: Routes = [
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+export const routes: Routes = [
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
   { 
     path: 'login',
     loadComponent: () => import('./components/dashboard/login.component')
       .then(m => m.LoginComponent)
   },
   { 
-    path: 'dashboard',
+    path: 'register',
+    loadComponent: () => import('./components/auth/register.component')
+      .then(m => m.RegisterComponent)
+  },
+  { 
+    path: 'home',
     loadComponent: () => import('./components/dashboard/dashboard.component')
       .then(m => m.DashboardComponent),
     canActivate: [AuthGuard]
   },
-  // Additional routes will be added as we create more components
+  {
+    path: 'market-data',
+    loadComponent: () => import('./components/market-data/market-data.component')
+      .then(m => m.MarketDataComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'analysis',
+    loadComponent: () => import('./components/analysis/analysis.component')
+      .then(m => m.AnalysisComponent),
+    canActivate: [AuthGuard]
+  }
 ];
 
 @NgModule({

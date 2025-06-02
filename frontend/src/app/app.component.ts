@@ -1,4 +1,10 @@
 import { Component } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-root',
@@ -13,13 +19,9 @@ import { Component } from '@angular/core';
     <mat-sidenav-container>
       <mat-sidenav #sidenav mode="side" opened>
         <mat-nav-list>
-          <a mat-list-item routerLink="/dashboard">
+          <a mat-list-item routerLink="/home">
             <mat-icon>dashboard</mat-icon>
             <span>Dashboard</span>
-          </a>
-          <a mat-list-item routerLink="/portfolio">
-            <mat-icon>account_balance</mat-icon>
-            <span>Portfolio</span>
           </a>
           <a mat-list-item routerLink="/market-data">
             <mat-icon>trending_up</mat-icon>
@@ -56,7 +58,16 @@ import { Component } from '@angular/core';
     .container {
       padding: 20px;
     }
-  `]
+  `],
+  imports: [
+    RouterModule,
+    MatToolbarModule,
+    MatSidenavModule,
+    MatIconModule,
+    MatListModule,
+    MatButtonModule
+  ],
+  standalone: true
 })
 export class AppComponent {
   title = 'Investment Portfolio';

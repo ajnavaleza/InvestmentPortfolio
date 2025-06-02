@@ -12,17 +12,23 @@
  * - Real-time value and allocation calculations
  */
 
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { Portfolio, Asset } from '../../services/portfolio.service';
-import { SearchResult } from '../../services/market-data.service';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+
+// Service imports
+import { MarketDataService } from '../../core/services/market-data.service';
+
+// Interface imports
+import { Portfolio, Asset, SearchResult } from '../../core/interfaces';
 
 @Component({
   selector: 'app-portfolio-item',
@@ -30,12 +36,14 @@ import { SearchResult } from '../../services/market-data.service';
   imports: [
     CommonModule,
     FormsModule,
-    MatExpansionModule,
-    MatFormFieldModule,
-    MatInputModule,
+    MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatAutocompleteModule
+    MatInputModule,
+    MatFormFieldModule,
+    MatExpansionModule,
+    MatAutocompleteModule,
+    MatSnackBarModule
   ],
   template: `
     <mat-expansion-panel class="portfolio-panel">
@@ -239,7 +247,7 @@ import { SearchResult } from '../../services/market-data.service';
     }
   `]
 })
-export class PortfolioItemComponent {
+export class PortfolioItemComponent implements OnInit {
   @Input() portfolio!: Portfolio;
   @Input() showAddAsset: boolean = false;
   @Input() newAsset!: { symbol: string; name: string; quantity: number; currentPrice: number; };
@@ -248,10 +256,16 @@ export class PortfolioItemComponent {
   @Output() toggleAddAsset = new EventEmitter<void>();
   @Output() addAsset = new EventEmitter<void>();
   @Output() cancelAddAsset = new EventEmitter<void>();
-  @Output() deleteAsset = new EventEmitter<number>();
+  @Output() deleteAsset = new EventEmitter<string | number>();
   @Output() deletePortfolio = new EventEmitter<void>();
   @Output() symbolChange = new EventEmitter<void>();
   @Output() stockSelected = new EventEmitter<string>();
+
+  constructor(private marketDataService: MarketDataService) {}
+
+  ngOnInit(): void {
+    // Initialize any additional logic if needed
+  }
 
   onToggleAddAsset(): void {
     this.toggleAddAsset.emit();
@@ -267,10 +281,8 @@ export class PortfolioItemComponent {
     this.cancelAddAsset.emit();
   }
 
-  onDeleteAsset(assetId: number): void {
-    if (confirm('Are you sure you want to delete this asset?')) {
-      this.deleteAsset.emit(assetId);
-    }
+  onDeleteAsset(assetId: string | number): void {
+    this.deleteAsset.emit(assetId);
   }
 
   onDeletePortfolio(): void {

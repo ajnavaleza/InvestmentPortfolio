@@ -17,7 +17,7 @@
   <div class="dashboard-header">
     <h1>Portfolio Dashboard</h1>
     <div class="user-info" *ngIf="currentUser">
-      <span>Welcome, {{currentUser.username}}!</span>
+      <span>Welcome, {{currentUser.displayName || currentUser.email}}!</span>
       <button mat-button (click)="logout()" color="warn">
         <mat-icon>logout</mat-icon>
         Logout
@@ -89,7 +89,7 @@
                 (toggleAddAsset)="toggleAddAsset(portfolio.id!)"
                 (addAsset)="addAsset(portfolio.id!)"
                 (cancelAddAsset)="cancelAddAsset(portfolio.id!)"
-                (deleteAsset)="deleteAsset($event)"
+                (deleteAsset)="deleteAsset(portfolio.id!, $event)"
                 (deletePortfolio)="deletePortfolio(portfolio.id!)"
                 (symbolChange)="onSymbolChange()"
                 (stockSelected)="onStockSelected($event)">
@@ -99,9 +99,6 @@
             <ng-template #noPortfolios>
               <div class="placeholder-content" *ngIf="!showCreatePortfolio">
                 <p>No portfolios found</p>
-                <button mat-raised-button color="primary" (click)="showCreatePortfolio = true">
-                  Create Your First Portfolio
-                </button>
               </div>
             </ng-template>
           </mat-card-content>
@@ -133,37 +130,4 @@
         </mat-card>
       </div>
     </div>
-
-    <!-- API Testing Section -->
-    <div class="test-section">
-      <mat-card class="dashboard-card">
-        <mat-card-header>
-          <mat-card-title>API Test Actions</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="test-actions">
-            <button mat-raised-button color="primary" (click)="testGetPortfolios()">
-              Test Get Portfolios
-            </button>
-            <button mat-raised-button color="accent" (click)="testGetCurrentUser()">
-              Test Get Current User
-            </button>
-            <button mat-raised-button color="warn" (click)="testMarketDataConnection()">
-              Test Market Data API
-            </button>
-            <button mat-raised-button (click)="refreshData()">
-              <mat-icon>refresh</mat-icon>
-              Refresh Data
-            </button>
-          </div>
-          <div class="loading-indicator" *ngIf="isLoading">
-            Loading portfolios...
-          </div>
-          <div class="loading-indicator" *ngIf="isLoadingMarketData">
-            Loading market data...
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  </div>
 </div> 
