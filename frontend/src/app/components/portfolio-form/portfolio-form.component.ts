@@ -65,6 +65,29 @@ import { MatButtonModule } from '@angular/material/button';
       display: flex;
       gap: 12px;
       margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* Mobile Responsive Design */
+    @media (max-width: 768px) {
+      .create-portfolio-form {
+        padding: 12px;
+      }
+
+      .form-actions {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .form-actions button {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .create-portfolio-form {
+        padding: 8px;
+      }
     }
   `]
 })

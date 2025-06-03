@@ -209,4 +209,153 @@
     text-align: center;
     margin: 1rem 0;
   }
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+  .market-data-container {
+    padding: 1rem;
+
+    .market-header {
+      margin-bottom: 1.5rem;
+
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        .header-actions {
+          flex-direction: column;
+          width: 100%;
+          gap: 0.5rem;
+
+          button {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+      }
+    }
+
+    .search-section {
+      flex-direction: column;
+      gap: 0.75rem;
+
+      .search-input {
+        width: 100%;
+      }
+
+      .search-button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    .market-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .market-card {
+      padding: 1rem;
+
+      .stock-item,
+      .index-item {
+        padding: 0.75rem;
+
+        .stock-header,
+        .index-details {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.25rem;
+        }
+
+        .stock-details {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.25rem;
+        }
+      }
+
+      .news-feed .news-item {
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+
+        h3 {
+          font-size: 1rem;
+        }
+
+        .news-source {
+          font-size: 0.8rem;
+        }
+
+        .news-summary {
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .market-data-container {
+    padding: 0.75rem;
+
+    .market-header .header-content h1 {
+      font-size: 1.25rem;
+    }
+
+    .search-section {
+      gap: 0.5rem;
+
+      .search-input {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      .search-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+
+    .market-card {
+      padding: 0.75rem;
+
+      h2 {
+        font-size: 1.1rem;
+      }
+
+      .stock-item,
+      .index-item {
+        padding: 0.5rem;
+
+        .symbol {
+          font-size: 1rem !important;
+        }
+
+        .price {
+          font-size: 0.9rem;
+        }
+      }
+
+      .news-feed .news-item {
+        h3 {
+          font-size: 0.95rem;
+        }
+
+        .news-source {
+          font-size: 0.75rem;
+        }
+
+        .news-summary {
+          font-size: 0.85rem;
+        }
+      }
+    }
+  }
 } 

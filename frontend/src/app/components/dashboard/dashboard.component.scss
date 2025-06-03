@@ -26,12 +26,15 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: 15px;
+  flex-wrap: wrap;
 }
 
 /* Statistics Row */
@@ -39,11 +42,13 @@
   display: flex;
   gap: 20px;
   margin-bottom: 30px;
+  flex-wrap: wrap;
 }
 
 .stat-card {
   flex: 1;
   min-height: 100px;
+  min-width: 200px;
 }
 
 .stat-content {
@@ -145,6 +150,7 @@
 .asset-details {
   display: flex;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .asset-details span {
@@ -187,6 +193,7 @@
   display: flex;
   gap: 12px;
   margin-top: 16px;
+  flex-wrap: wrap;
 }
 
 /* Actions */
@@ -228,27 +235,126 @@ mat-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
 }
 
-/* Responsive Design */
+/* Enhanced Mobile Responsive Design */
 @media (max-width: 768px) {
-  .content-row {
-    flex-direction: column;
-  }
-
-  .stats-row {
-    flex-direction: column;
-  }
-
   .dashboard-container {
     padding: 10px;
   }
 
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .user-info {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .stats-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .stat-card {
+    min-width: unset;
+  }
+
+  .content-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .dashboard-card {
+    min-height: unset;
+  }
+
+  .portfolios-section .dashboard-card,
+  .side-section .dashboard-card {
+    min-height: unset;
+  }
+
   .asset-form-row {
     flex-direction: column;
+    gap: 12px;
+  }
+
+  .asset-details {
+    gap: 8px;
+  }
+
+  .asset-details span {
+    font-size: 11px;
   }
 
   .test-actions {
     flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+
+  mat-card-header {
+    gap: 12px;
+  }
+
+  .asset-list {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 8px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .asset-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .asset-info {
+    width: 100%;
+  }
+
+  .asset-details {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .portfolio-actions {
+    justify-content: center;
+  }
+
+  .user-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .create-portfolio-form,
+  .add-asset-form {
+    padding: 12px;
   }
 } 

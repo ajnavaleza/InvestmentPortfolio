@@ -48,188 +48,157 @@
     gap: 2rem;
   }
 
-  .overview-section {
-    .overview-card {
-      .overview-stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
+  .overview-section .overview-card .overview-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
 
-        .stat-item {
-          text-align: center;
-          padding: 1rem;
-          border-radius: 8px;
-          background-color: #f8f9fa;
+    .stat-item {
+      text-align: center;
+      padding: 1rem;
+      border-radius: 8px;
+      background-color: #f8f9fa;
 
-          .stat-label {
-            display: block;
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 0.5rem;
-          }
+      .stat-label {
+        display: block;
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+      }
 
-          .stat-value {
-            display: block;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #333;
-          }
-        }
+      .stat-value {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
       }
     }
   }
 
-  .metrics-section {
-    .metrics-card {
-      .metrics-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
+  .metrics-section .metrics-card .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
 
-        .metric-item {
-          padding: 1rem;
-          border-radius: 8px;
-          background-color: #f8f9fa;
+    .metric-item {
+      padding: 1rem;
+      border-radius: 8px;
+      background-color: #f8f9fa;
 
-          .metric-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-
-            .metric-label {
-              font-weight: 500;
-              color: #333;
-            }
-          }
-
-          .metric-value {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 0.5rem;
-          }
-
-          .metric-description {
-            font-size: 0.85rem;
-            color: #666;
-            line-height: 1.4;
-          }
-        }
-      }
-    }
-  }
-
-  .allocation-section {
-    .allocation-card {
-      .allocation-content {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
+      .metric-header {
+        display: flex;
         align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
 
-        @media (max-width: 768px) {
-          grid-template-columns: 1fr;
+        .metric-label {
+          font-weight: 500;
+          color: #333;
+        }
+      }
+
+      .metric-value {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+      }
+
+      .metric-description {
+        font-size: 0.85rem;
+        color: #666;
+        line-height: 1.4;
+      }
+    }
+  }
+
+  .allocation-section .allocation-card .allocation-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+
+    .allocation-chart {
+      display: flex;
+      justify-content: center;
+
+      .pie-chart {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        position: relative;
+        border: 2px solid #e0e0e0;
+      }
+    }
+
+    .allocation-legend .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+      background-color: #f8f9fa;
+
+      .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .legend-details {
+        display: grid;
+        grid-template-columns: 60px 1fr auto auto;
+        gap: 0.5rem;
+        align-items: center;
+        width: 100%;
+
+        .legend-symbol {
+          font-weight: 600;
+          color: #333;
         }
 
-        .allocation-chart {
-          display: flex;
-          justify-content: center;
-
-          .pie-chart {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            position: relative;
-            border: 2px solid #e0e0e0;
-          }
+        .legend-name {
+          color: #666;
+          font-size: 0.9rem;
         }
 
-        .allocation-legend {
-          .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-            border-radius: 4px;
-            background-color: #f8f9fa;
-
-            .legend-color {
-              width: 16px;
-              height: 16px;
-              border-radius: 50%;
-              flex-shrink: 0;
-            }
-
-            .legend-details {
-              display: grid;
-              grid-template-columns: 60px 1fr auto auto;
-              gap: 0.5rem;
-              align-items: center;
-              width: 100%;
-
-              .legend-symbol {
-                font-weight: 600;
-                color: #333;
-              }
-
-              .legend-name {
-                color: #666;
-                font-size: 0.9rem;
-              }
-
-              .legend-percentage {
-                font-weight: 500;
-                color: #333;
-                text-align: right;
-              }
-
-              .legend-value {
-                font-weight: 500;
-                color: #333;
-                text-align: right;
-              }
-            }
-          }
+        .legend-percentage,
+        .legend-value {
+          font-weight: 500;
+          color: #333;
+          text-align: right;
         }
       }
     }
   }
 
-  .performers-section {
-    .performers-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
+  .performers-section .performers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
 
-      @media (max-width: 768px) {
-        grid-template-columns: 1fr;
+    .performer-card .performer-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .performer-symbol {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
       }
 
-      .performer-card {
-        .performer-details {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
+      .performer-name {
+        color: #666;
+        font-size: 0.9rem;
+      }
 
-          .performer-symbol {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #333;
-          }
-
-          .performer-name {
-            color: #666;
-            font-size: 0.9rem;
-          }
-
-          .performer-price {
-            font-size: 1.2rem;
-            font-weight: 500;
-            color: #333;
-          }
-        }
+      .performer-price {
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: #333;
       }
     }
   }
@@ -268,6 +237,117 @@
           margin: 0;
           color: #666;
           line-height: 1.5;
+        }
+      }
+    }
+  }
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+  .analysis-container {
+    padding: 1rem;
+
+    .analysis-header {
+      margin-bottom: 1.5rem;
+
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        .header-actions {
+          flex-direction: column;
+          width: 100%;
+          gap: 0.75rem;
+
+          mat-form-field {
+            min-width: unset;
+            width: 100%;
+          }
+
+          button {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+      }
+    }
+
+    .analysis-content {
+      gap: 1.5rem;
+    }
+
+    .overview-section .overview-card .overview-stats,
+    .metrics-section .metrics-card .metrics-grid,
+    .performers-section .performers-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .allocation-section .allocation-card .allocation-content {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+
+      .allocation-chart .pie-chart {
+        width: 150px;
+        height: 150px;
+      }
+
+      .allocation-legend .legend-item .legend-details {
+        grid-template-columns: 50px 1fr auto;
+        gap: 0.25rem;
+
+        .legend-name {
+          font-size: 0.8rem;
+        }
+
+        .legend-value {
+          display: none;
+        }
+      }
+    }
+
+    .loading-container,
+    .empty-state {
+      min-height: 300px;
+
+      mat-card {
+        max-width: 300px;
+        margin: 0 1rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .analysis-container {
+    padding: 0.75rem;
+
+    .analysis-header .header-content h1 {
+      font-size: 1.25rem;
+    }
+
+    .allocation-section .allocation-card .allocation-content {
+      .allocation-chart .pie-chart {
+        width: 120px;
+        height: 120px;
+      }
+
+      .allocation-legend .legend-item {
+        padding: 0.4rem;
+
+        .legend-color {
+          width: 12px;
+          height: 12px;
+        }
+
+        .legend-details {
+          grid-template-columns: 40px 1fr auto;
+          font-size: 0.8rem;
         }
       }
     }

@@ -28,4 +28,101 @@ $theme: mat.define-light-theme((
   density: 0,
 ));
 
-@include mat.all-component-themes($theme); 
+@include mat.all-component-themes($theme);
+
+/* Mobile-first responsive design */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  /* Improve touch targets for mobile */
+  .mat-button, .mat-raised-button, .mat-stroked-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .mat-icon-button {
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+  }
+
+  /* Improve form fields on mobile */
+  .mat-form-field {
+    width: 100%;
+  }
+
+  /* Better spacing for mobile */
+  .mat-card {
+    margin-bottom: 16px;
+  }
+
+  .mat-card-content {
+    padding: 12px !important;
+  }
+
+  .mat-card-header {
+    padding: 12px 12px 0 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 8px;
+  }
+
+  /* Smaller typography on very small screens */
+  h1 {
+    font-size: 1.5rem !important;
+  }
+
+  h2 {
+    font-size: 1.25rem !important;
+  }
+
+  .mat-card-title {
+    font-size: 1.1rem !important;
+  }
+
+  /* Stack action buttons vertically on very small screens */
+  .mat-dialog-actions,
+  .form-actions {
+    flex-direction: column;
+    
+    .mat-button,
+    .mat-raised-button {
+      width: 100%;
+      margin-bottom: 8px;
+    }
+  }
+}
+
+/* Utility classes for responsive design */
+.mobile-only {
+  display: none !important;
+}
+
+.desktop-only {
+  display: block !important;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block !important;
+  }
+  
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+/* Improve scrolling performance on mobile */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent horizontal scrolling */
+body {
+  overflow-x: hidden;
+} 

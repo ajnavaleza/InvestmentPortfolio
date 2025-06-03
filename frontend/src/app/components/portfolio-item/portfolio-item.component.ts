@@ -173,17 +173,21 @@ import { Portfolio, Asset, SearchResult } from '../../core/interfaces';
       align-items: center;
       padding: 12px;
       border-bottom: 1px solid #eee;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .asset-info {
       display: flex;
       flex-direction: column;
       gap: 4px;
+      flex: 1;
     }
 
     .asset-details {
       display: flex;
       gap: 16px;
+      flex-wrap: wrap;
     }
 
     .asset-details span {
@@ -215,16 +219,19 @@ import { Portfolio, Asset, SearchResult } from '../../core/interfaces';
       display: flex;
       gap: 16px;
       margin-bottom: 16px;
+      flex-wrap: wrap;
     }
 
     .asset-form-row mat-form-field {
       flex: 1;
+      min-width: 200px;
     }
 
     .form-actions {
       display: flex;
       gap: 12px;
       margin-top: 16px;
+      flex-wrap: wrap;
     }
 
     .portfolio-actions {
@@ -235,14 +242,71 @@ import { Portfolio, Asset, SearchResult } from '../../core/interfaces';
       justify-content: flex-end;
     }
 
+    /* Enhanced Mobile Responsive Design */
     @media (max-width: 768px) {
       .asset-form-row {
         flex-direction: column;
+        gap: 12px;
+      }
+
+      .asset-form-row mat-form-field {
+        min-width: unset;
+        width: 100%;
       }
 
       .asset-details {
         flex-direction: column;
         gap: 4px;
+      }
+
+      .asset-item {
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .form-actions {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .form-actions button {
+        width: 100%;
+      }
+
+      .portfolio-actions {
+        justify-content: center;
+      }
+
+      .add-asset-form {
+        padding: 12px;
+      }
+
+      .asset-list {
+        max-height: 250px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .asset-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 8px;
+      }
+
+      .asset-info {
+        width: 100%;
+      }
+
+      .asset-details span {
+        font-size: 11px;
+      }
+
+      .portfolio-details {
+        padding: 12px 0;
+      }
+
+      .add-asset-form {
+        padding: 8px;
       }
     }
   `]
